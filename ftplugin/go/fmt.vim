@@ -53,11 +53,12 @@ function! s:GoFormat()
     " If spaces are used for indents, configure gofmt
     if &expandtab
         let tabs = ' -tabs=false -tabwidth=' . (&sw ? &sw : (&sts ? &sts : &ts))
-    else 
+    else
         let tabs = ''
     endif
 
-    silent execute "%!" . g:gofmt_command . tabs
+    silent! execute "silent! %!" . g:gofmt_command . tabs
+    redraw!
 
     if v:shell_error
         let errors = []
@@ -74,10 +75,6 @@ function! s:GoFormat()
             % | " Couldn't detect gofmt error format, output errors
         endif
         undo
-        if !empty(errors)
-            call setloclist(0, errors, 'r')
-        endif
-        echohl Error | echomsg "Gofmt returned error" | echohl None
     endif
     call winrestview(view)
 endfunction
