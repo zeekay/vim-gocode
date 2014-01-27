@@ -7,15 +7,41 @@ if !exists('g:go_install_commands')
 endif
 
 if g:go_install_commands
-    command! -buffer -nargs=1 -complete=dir GoInstall call s:GoInstall(getcwd(), <f-args>)
-    command! -buffer -nargs=1 -complete=dir GoTestVerbose call s:GoTestVerbose(getcwd(), <f-args>)
-    command! -buffer GoCurInstall call s:GoInstall(@%, '.')
-    command! -buffer -nargs=1 -complete=dir GoTest call s:GoTest(getcwd(), <f-args>)
-    command! -buffer GoCurTest call s:GoTest(@%, '.')
+    command! -buffer -nargs=* -complete=dir GoBuild call s:GoBuild(<f-args>)
+    command! -buffer -nargs=* -complete=dir GoInstall call s:GoInstall(<f-args>)
+    command! -buffer -nargs=* -complete=dir GoRun call s:GoRun(<f-args>)
+    command! -buffer -nargs=* -complete=dir GoTest call s:GoTest(<f-args>)
+    command! -buffer -nargs=* -complete=dir GoTestVerbose call s:GoTestVerbose(<f-args>)
 endif
 
-function! s:GoInstall(file, relpkg)
-    let pkg=GoRelPkg(a:file, a:relpkg)
+function! s:GoBuild(...)
+    if a:0 == 1
+        let relpkg=a:1
+        let file=getcwd()
+    else
+        let relpkg=expand('%')
+        let file=''
+    endif
+
+    let pkg=GoRelPkg(file, relpkg)
+    if pkg != -1
+        let output=system('go build '.pkg)
+        echo output
+    else
+        echohl Error | echo 'You are not in a go package' | echohl None
+    endif
+endfunction
+
+function! s:GoInstall(...)
+    if a:0 == 1
+        let relpkg=a:1
+        let file=getcwd()
+    else
+        let relpkg=expand('%')
+        let file=''
+    endif
+
+    let pkg=GoRelPkg(file, relpkg)
     if pkg != -1
         let output=system('go install '.pkg)
         if !v:shell_error
@@ -28,8 +54,34 @@ function! s:GoInstall(file, relpkg)
     endif
 endfunction
 
-function! s:GoTest(file, relpkg)
-    let pkg=GoRelPkg(a:file, a:relpkg)
+function! s:GoRun(...)
+    if a:0 == 1
+        let relpkg=a:1
+        let file=getcwd()
+    else
+        let relpkg=expand('%')
+        let file=''
+    endif
+
+    let pkg=GoRelPkg(file, relpkg)
+    if pkg != -1
+        let output=system('go run '.relpkg)
+        echo output
+    else
+        echohl Error | echo 'You are not in a go package' | echohl None
+    endif
+endfunction
+
+function! s:GoTest(...)
+    if a:0 == 1
+        let relpkg=a:1
+        let file=getcwd()
+    else
+        let relpkg=expand('%')
+        let file=''
+    endif
+
+    let pkg=GoRelPkg(file, relpkg)
     if pkg != -1
         echo system('go test '.pkg)
     else
@@ -37,8 +89,16 @@ function! s:GoTest(file, relpkg)
     endif
 endfunction
 
-function! s:GoTestVerbose(file, relpkg)
-    let pkg=GoRelPkg(a:file, a:relpkg)
+function! s:GoTestVerbose(...)
+    if a:0 == 1
+        let relpkg=a:1
+        let file=getcwd()
+    else
+        let relpkg=expand('%')
+        let file=''
+    endif
+
+    let pkg=GoRelPkg(file, relpkg)
     if pkg != -1
         echo system('go test -v '.pkg)
     else
