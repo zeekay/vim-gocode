@@ -8,6 +8,7 @@ endif
 
 if g:go_install_commands
     command! -buffer -nargs=* -complete=dir GoBuild call s:GoBuild(<f-args>)
+    command! -buffer -nargs=* -complete=dir GoGet call s:GoGet(<f-args>)
     command! -buffer -nargs=* -complete=dir GoInstall call s:GoInstall(<f-args>)
     command! -buffer -nargs=* -complete=dir GoRun call s:GoRun(<f-args>)
     command! -buffer -nargs=* -complete=dir GoTest call s:GoTest(<f-args>)
@@ -30,6 +31,10 @@ function! s:GoBuild(...)
     else
         echohl Error | echo 'You are not in a go package' | echohl None
     endif
+endfunction
+
+function! s:GoGet(...)
+    exec '!go get '.join(a:000, ' ')
 endfunction
 
 function! s:GoInstall(...)
